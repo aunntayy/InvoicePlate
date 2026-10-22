@@ -2,7 +2,7 @@
 // price comparison and duplicate checks live in lib/invoice-logic.js.
 import {
   money, signed, num, sumMoney, norm, invTotal, fmtDate, fmtShort, fmtPct, perUnit, invLabel, plural,
-  sortInvoices, dupReason, findDuplicates, analyze, alertText, parseLine, sampleInvoices,
+  sortInvoices, dupReason, findDuplicates, analyze, alertText, parseLine, sampleInvoices, summaryText,
 } from './lib/invoice-logic.js';
 
 // ?demo shows the sample invoices in memory, without reading or writing the database (for showing owners).
@@ -297,27 +297,8 @@ function renderReport() {
     </div>`;
 }
 
-function summaryText() {
-  const t = Number(db.settings.alertPct) || 0;
-  const { events } = analyze(db.invoices);
-  const ups = events.filter(e => e.pct >= t).sort((a, b) => b.impact - a.impact);
-  const dups = findDuplicates(db.invoices);
-  const out = [`Price report for ${restaurantName()}, ${fmtDate(today())}`, ''];
-  if (ups.length) {
-    out.push(`Price increases (${t}% or more):`);
-    ups.forEach(e => out.push(`- ${alertText(e)} (${fmtDate(e.inv.date)})`));
-    out.push('', `Extra paid vs. previous prices: ${money(sumMoney(ups.map(e => e.impact)))}`);
-  } else out.push('No price increases found.');
-  if (dups.length) {
-    out.push('', 'Possible duplicate invoices:');
-    dups.forEach(d => out.push(`- ${invLabel(d.b)} on ${fmtDate(d.b.date)} (${money(invTotal(d.b))}) matches ${invLabel(d.a)} on ${fmtDate(d.a.date)}. ${d.reason}.`));
-  }
-  out.push('', 'Based on the invoices you sent. Lines are checked by hand, but please confirm with your supplier before acting.');
-  return out.join('\n');
-}
-
 async function copySummary() {
-  const text = summaryText();
+  const text = summaryText(db.invoices, { restaurant: restaurantName(), alertPct: db.settings.alertPct }, today());
   try {
     await navigator.clipboard.writeText(text);
     showMsg('#copy-msg', 'Summary copied. Paste it into a text or an email.', 'ok');

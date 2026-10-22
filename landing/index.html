@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#e5e1d8">
+<title>InvoicePlate: what supplier price rises cost your restaurant</title>
+<meta name="description" content="Send your supplier invoices. A person reads every line and tells you, in dollars, which prices went up and what it cost. Free pilot for Salt Lake City restaurants.">
+<script>document.documentElement.classList.add('js')</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Stack+Sans+Headline:wght@300&family=Stack+Sans+Text:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#flag">Skip to content</a>
+
+<header class="hero" id="top">
+  <div class="hero-copy-half">
+    <a class="mark" href="#top" aria-label="InvoicePlate, back to top">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13"/><path d="M10 13h12M10 17h12M10 21h7"/></svg>
+      <span>InvoicePlate</span>
+    </a>
+    <div class="hero-copy">
+      <h1 class="head lines">
+        <span class="line"><span data-line style="--i:0">Know what price</span></span>
+        <span class="line"><span data-line style="--i:1">rises cost you</span></span>
+      </h1>
+      <p class="hero-sub" data-rise style="--i:2">Send me your supplier invoices. I read every line and tell you, in dollars, which prices went up and what it cost.</p>
+      <a class="button" href="#join" data-rise style="--i:3">Join the pilot</a>
+    </div>
+  </div>
+
+  <div class="hero-ui-half">
+    <a class="toplink link" href="#how">How it works</a>
+    <form class="calc" data-ui aria-label="Try it: one line from a real-looking invoice" onsubmit="return false">
+      <div class="calc-head"><b>Valley Foodservice</b><span>Invoice VF-10588, Oct 5</span></div>
+      <p class="calc-item">Chicken thighs, boneless</p>
+      <div class="calc-fields">
+        <label>Quantity<span class="in"><input id="c-qty" inputmode="decimal" value="40" aria-label="Quantity in pounds"><i>lb</i></span></label>
+        <label>Last paid<span class="in"><i>$</i><input id="c-old" inputmode="decimal" value="2.10" aria-label="Last price paid per pound"><i>/lb</i></span></label>
+        <label>This invoice<span class="in is-focus"><i>$</i><input id="c-new" inputmode="decimal" value="2.39" aria-label="Price on this invoice per pound"><i>/lb</i></span></label>
+      </div>
+      <output class="calc-out" for="c-qty c-old c-new" aria-live="polite">
+        <span class="chg up" id="c-chg">▲ 14% <small id="c-unit">+$0.29/lb</small></span>
+        <span class="row"><span>Extra on this delivery</span><b id="c-extra">$11.60</b></span>
+        <span class="row"><span>If you buy this every week</span><b id="c-year">$603.20 a year</b></span>
+      </output>
+      <p class="calc-note">Change any number. This is the sum InvoicePlate does for every line.</p>
+    </form>
+  </div>
+</header>
+
+<main>
+
+<section class="showcase" id="flag" data-field="ink" aria-labelledby="flag-title">
+  <div class="show-copy" data-reveal>
+    <h2 class="sec-head" id="flag-title">Flag rises over <span id="flag-word">2%</span></h2>
+    <p>A few cents either way is noise. You pick the size of rise that's worth hearing about, and the report leaves out the rest.</p>
+  </div>
+  <div class="seg-big" data-ui role="radiogroup" aria-label="Flag price changes of">
+    <span class="seg-label">Flag changes of</span>
+    <span class="seg-row">
+      <button type="button" role="radio" aria-checked="true" data-pct="2">2%</button>
+      <button type="button" role="radio" aria-checked="false" data-pct="5">5%</button>
+      <button type="button" role="radio" aria-checked="false" data-pct="10">10%</button>
+    </span>
+  </div>
+</section>
+
+<section class="how" id="how" aria-labelledby="how-title">
+  <div class="how-col">
+    <h2 class="sec-head" id="how-title" data-reveal>How the pilot works</h2>
+
+    <div class="stage">
+      <p data-reveal><b>To begin, photograph your last 20 or so invoices</b> and text or email them to me. Paper copies, PDFs and downloads from your supplier’s site all work.</p>
+      <div class="frames" data-reveal style="--i:1">
+        <img src="assets/still-life-with-game-fowl.jpg" width="1600" height="1226" alt="Painting of a cabbage, a quince, a melon and game birds hanging in a stone window" loading="lazy" decoding="async">
+        <img src="assets/fish-still-life.jpg" width="1600" height="1267" alt="Painting of a fish, red mullet, oysters, an eel and a lemon beside a copper pot" loading="lazy" decoding="async">
+        <img src="assets/still-life.jpg" width="1600" height="980" alt="Painting of a table set with a pie, sliced lemons, bread, olives and a pewter jug" loading="lazy" decoding="async">
+      </div>
+      <p class="caption" data-reveal style="--i:2">What those invoices are made of. Still lifes by Sánchez Cotán, Manet and Claesz.</p>
+    </div>
+
+    <div class="stage">
+      <p data-reveal><b>Within a few days, I read every line</b> into InvoicePlate: the item, quantity, unit and price, checked against your photo. If a line is hard to read, I ask you rather than guess.</p>
+      <div class="ui-panel" data-ui data-reveal style="--i:1">
+        <div class="ui-head"><b>Valley Foodservice #VF-10588</b><span>Oct 5, 2026</span></div>
+        <table class="ui-table">
+          <thead><tr><th>Item</th><th class="n">Qty</th><th>Unit</th><th class="n">Price</th><th class="n">Total</th></tr></thead>
+          <tbody>
+            <tr class="is-hover"><td>Chicken thighs, boneless</td><td class="n">40</td><td>lb</td><td class="n">$2.39</td><td class="n">$95.60</td></tr>
+            <tr><td>Canola oil 35 lb</td><td class="n">2</td><td>cs</td><td class="n">$41.25</td><td class="n">$82.50</td></tr>
+            <tr><td>Yellow onions 50 lb</td><td class="n">1</td><td>bag</td><td class="n">$23.50</td><td class="n">$23.50</td></tr>
+            <tr><td>Heavy cream</td><td class="n">12</td><td>qt</td><td class="n">$3.15</td><td class="n">$37.80</td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="4">Invoice total</td><td class="n">$239.40</td></tr></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="stage">
+      <p data-reveal><b>Then you get a report</b> listing every price that went up, by how much, and what it cost you on that delivery, largest first.</p>
+      <div class="ui-panel" data-ui data-reveal style="--i:1">
+        <div class="ui-head"><b>Where the extra went</b><span>2 deliveries, Oct 5–7</span></div>
+        <ul class="bars">
+          <li><span>Chicken thighs, boneless</span><span class="bar" style="--w:100%"></span><b>$11.60</b></li>
+          <li><span>Romaine hearts</span><span class="bar" style="--w:78%"></span><b>$9.00</b></li>
+          <li><span>Canola oil 35 lb</span><span class="bar" style="--w:47%"></span><b>$5.50</b></li>
+          <li><span>Heavy cream</span><span class="bar" style="--w:21%"></span><b>$2.40</b></li>
+        </ul>
+        <div class="ui-foot"><span>Extra paid vs. previous prices</span><b>$28.50</b></div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <p data-reveal><b>From then on, send each week’s invoices</b> and get a short summary by text, the same day I read them.</p>
+      <div class="sms" data-ui data-reveal style="--i:1">
+        <span class="sms-from">InvoicePlate</span>
+        <p class="bubble">Chicken thighs, boneless (Valley Foodservice) went up 14%: $2.10/lb → $2.39/lb. Extra cost on this delivery: $11.60.</p>
+        <p class="bubble">Romaine hearts (Wasatch Produce) went up 14%: $32.00/cs → $36.50/cs. Extra cost on this delivery: $9.00.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="try" id="try" aria-labelledby="try-title">
+  <div class="try-top">
+    <h2 class="sec-head" id="try-title" data-reveal>Try it on a real week</h2>
+    <p class="try-intro" data-reveal style="--i:1">Two suppliers, two weeks, five invoices. The report is written by the same code InvoicePlate uses. Change the week and watch it rewrite itself.</p>
+  </div>
+  <div class="try-field">
+    <div class="report" data-ui aria-live="polite">
+      <div class="report-head"><b>Price report</b><span>To you, by text or email</span></div>
+      <pre id="summary" class="report-text">Price report for Bistro on 9th, Oct 22, 2026
+
+Price increases (2% or more):
+- Chicken thighs, boneless (Valley Foodservice) went up 14%: $2.10/lb → $2.39/lb. Extra cost on this delivery: $11.60. (Oct 5, 2026)
+- Romaine hearts (Wasatch Produce) went up 14%: $32.00/cs → $36.50/cs. Extra cost on this delivery: $9.00. (Oct 7, 2026)
+- Canola oil 35 lb (Valley Foodservice) went up 7.1%: $38.50/cs → $41.25/cs. Extra cost on this delivery: $5.50. (Oct 5, 2026)
+- Heavy cream (Valley Foodservice) went up 6.8%: $2.95/qt → $3.15/qt. Extra cost on this delivery: $2.40. (Oct 5, 2026)
+
+Extra paid vs. previous prices: $28.50
+
+Based on the invoices you sent. Lines are checked by hand, but please confirm with your supplier before acting.</pre>
+    </div>
+  </div>
+  <div class="try-col">
+
+    <div class="block" data-reveal>
+      <p class="lead">It counts what you bought.</p>
+      <p>A rise on something you buy 80 pounds of matters more than the same rise on one case. Move the slider and the dollar figure follows.</p>
+      <label class="ctl" data-ui>Chicken thighs this week <b id="qty-out">40 lb</b>
+        <input type="range" id="t-qty" min="10" max="120" step="5" value="40">
+      </label>
+    </div>
+
+    <div class="block" data-reveal>
+      <p class="lead">It catches the same invoice twice.</p>
+      <p>Valley Foodservice invoice VF-10588 was entered as two copies. The report flags it and doesn’t count the second copy as a new delivery.</p>
+      <label class="ctl switch" data-ui><input type="checkbox" id="t-dup" role="switch"> Include the second copy of VF-10588</label>
+    </div>
+
+    <div class="block" data-reveal>
+      <p class="lead">Every number traces back to a line.</p>
+      <p>Change this week’s price for heavy cream, the way you’d correct a misread line, and the report recalculates.</p>
+      <label class="ctl" data-ui>Heavy cream, per quart
+        <span class="in"><i>$</i><input id="t-cream" inputmode="decimal" value="3.15"></span>
+      </label>
+    </div>
+
+    <div class="block" data-reveal>
+      <p class="lead">It’s written for you.</p>
+      <p>The summary arrives as a text or an email you can forward to your chef or your bookkeeper as it is.</p>
+      <label class="ctl" data-ui>Restaurant name
+        <span class="in"><input id="t-name" value="Bistro on 9th" autocomplete="organization"></span>
+      </label>
+    </div>
+  </div>
+</section>
+
+<section class="letter" id="letter" aria-labelledby="letter-title">
+  <figure class="street" data-reveal>
+    <div class="street-frame"><img src="assets/main-street-1890.jpg" width="2400" height="1258" alt="Main Street, Salt Lake City, around 1890: shopfronts with awnings, wagons and a streetcar" loading="lazy" decoding="async"></div>
+    <figcaption>Main Street, Salt Lake City, around 1890. Photograph by Charles Roscoe Savage.</figcaption>
+  </figure>
+  <div class="letter-col">
+    <h2 class="sec-head" id="letter-title" data-reveal>Why I’m building this</h2>
+    <div data-reveal style="--i:1">
+      <p>I work as a server in Salt Lake City, so I see what a kitchen looks like when the truck arrives. The invoice gets signed, put on a spike or in a folder, and rarely compared with last week’s.</p>
+      <p>Yet everything an owner needs to know about price rises is printed on that paper. Finding it means sitting with a stack of invoices and a spreadsheet, and nobody has that hour.</p>
+      <p>The software that does this well is built and priced for restaurant groups with a finance team. I’m building InvoicePlate for the places I actually work in: one location, an owner who does the books at night.</p>
+      <p>For now I read every invoice myself. That’s on purpose. <mark>I want to learn what owners need</mark> before I automate any of it.</p>
+      <p>If you run a restaurant in Salt Lake and this sounds useful, send me twenty invoices. I’ll show you what I find.</p>
+    </div>
+    <p class="sign" data-reveal style="--i:2"><em>The founder of InvoicePlate</em><span>Server, Salt Lake City</span></p>
+  </div>
+</section>
+
+<section class="pilot" id="pilot" aria-labelledby="pilot-title">
+  <div class="pilot-copy" data-reveal>
+    <h2 class="sec-head" id="pilot-title">The pilot is free</h2>
+    <p>I’m looking for a few Salt Lake restaurants to try InvoicePlate before it has a price. After the pilot you decide whether it’s worth paying for. Nothing is charged automatically.</p>
+  </div>
+  <div class="pilot-figure">
+    <div class="price-row" data-reveal><p class="price" aria-label="Zero dollars"><span class="cur">$</span>0</p><span class="per">for the pilot</span><img class="price-pic" src="assets/still-life.jpg" width="1600" height="980" alt="Detail of a painted table: a pewter plate of sliced lemons" loading="lazy" decoding="async"></div>
+    <ul class="incl" data-reveal style="--i:1">
+      <li>Your last 20 or so invoices, read by hand</li>
+      <li>A price report within a few days</li>
+      <li>A short summary each week while the pilot runs</li>
+      <li>Everything deleted whenever you ask</li>
+    </ul>
+    <a class="button" href="#join" data-reveal style="--i:2">Join the pilot</a>
+  </div>
+</section>
+
+<section class="faq" id="questions" aria-labelledby="faq-title">
+  <div class="faq-list">
+    <h2 class="faq-title" id="faq-title">Questions</h2>
+    <div class="qa">
+      <button type="button" class="q" aria-expanded="true">Which suppliers does it work with?</button>
+      <div class="a"><p>Any supplier whose invoices you get on paper or by email: broadline distributors, produce, meat, dairy, bakery and beverage.</p></div>
+    </div>
+    <div class="qa">
+      <button type="button" class="q" aria-expanded="false">Do I need to install anything?</button>
+      <div class="a"><p>No. You send photos by text or email, and the report comes back the same way. There’s nothing to log into.</p></div>
+    </div>
+    <div class="qa">
+      <button type="button" class="q" aria-expanded="false">Who sees my invoices?</button>
+      <div class="a"><p>Only me. They’re stored encrypted, used only to make your report and never sold. Ask and I delete all of it.</p></div>
+    </div>
+    <div class="qa">
+      <button type="button" class="q" aria-expanded="false">How accurate is it?</button>
+      <div class="a"><p>Every line is checked by hand against your photo before it counts. Still, confirm with your supplier before you act on a number.</p></div>
+    </div>
+    <div class="qa">
+      <button type="button" class="q" aria-expanded="false">What doesn’t it do?</button>
+      <div class="a"><p>It never pays bills, touches your bank account or logs into supplier portals. It only reads the invoices you send.</p></div>
+    </div>
+    <div class="qa">
+      <button type="button" class="q" aria-expanded="false">What happens after the pilot?</button>
+      <div class="a"><p>We talk about whether the reports were worth it and what a fair monthly price would be. If not, I delete your data.</p></div>
+    </div>
+  </div>
+  <div class="faq-pane" aria-hidden="true"><p id="faq-answer"></p></div>
+</section>
+
+<section class="join" id="join" aria-labelledby="join-title">
+  <div class="join-copy" data-reveal>
+    <h2 class="join-head" id="join-title">Send me<br>twenty invoices</h2>
+    <p>I’ll reply within a day to agree how you’ll send them, and your first report follows within a few days.</p>
+  </div>
+  <form class="dialog" data-ui id="join-form" aria-label="Join the pilot">
+    <p class="dialog-title">Join the pilot</p>
+    <label for="j-name">Restaurant</label>
+    <input id="j-name" name="restaurant" placeholder="Bistro on 9th" autocomplete="organization">
+    <span class="dialog-label" id="j-by-label">I’ll send invoices by</span>
+    <span class="seg" role="radiogroup" aria-labelledby="j-by-label">
+      <button type="button" role="radio" aria-checked="true" data-by="text">Text</button>
+      <button type="button" role="radio" aria-checked="false" data-by="email">Email</button>
+    </span>
+    <a class="dialog-go" id="j-go" href="mailto:hello@invoiceplate.com?subject=InvoicePlate%20pilot">Join the pilot</a>
+    <p class="dialog-note">Opens an email to hello@invoiceplate.com with these details filled in.</p>
+  </form>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="tile t-state">
+    <p>InvoicePlate reads restaurant supplier invoices and tells owners what price rises cost them.</p>
+    <p class="legal">© 2026 InvoicePlate. Read-only: it never moves money.</p>
+  </div>
+  <nav class="tile t-nav" aria-label="Footer">
+    <a class="link" href="#how">How it works</a>
+    <a class="link" href="#try">Try it</a>
+    <a class="link" href="#letter">Letter</a>
+    <a class="link" href="#pilot">Pilot</a>
+    <a class="link" href="#questions">Questions</a>
+  </nav>
+  <div class="tile t-city"><p>Salt Lake City</p><p class="clock" id="clock">Mountain Time</p></div>
+  <div class="tile t-mail"><a class="link" href="mailto:hello@invoiceplate.com">hello@invoiceplate.com</a></div>
+  <div class="tile t-word" aria-hidden="true">InvoicePlate</div>
+  <a class="tile t-go" href="#join"><span>Join the pilot</span>
+    <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 38 38 10M16 10h22v22"/></svg>
+  </a>
+  <p class="credits">Pictures: <a href="https://commons.wikimedia.org/wiki/File:Salt_lake_city_main_street_c1890_ug.jpg">“Salt Lake City Main Street, c. 1890”</a> by Charles Roscoe Savage, public domain, via Wikimedia Commons; <a href="https://www.artic.edu/artworks/84709">“Still Life with Game Fowl”</a> by Juan Sánchez Cotán, c. 1600–3; <a href="https://www.artic.edu/artworks/44892">“Fish (Still Life)”</a> by Édouard Manet, 1864; <a href="https://www.artic.edu/artworks/21682">“Still Life”</a> by Pieter Claesz, c. 1625; all three public domain (CC0), via the Art Institute of Chicago.</p>
+</footer>
+
+<script type="module" src="main.js"></script>
+</body>
+</html>

@@ -67,6 +67,25 @@ export function alertText(e) {
   return `${e.line.item} (${e.inv.supplier}) ${dir} ${fmtPct(e.pct)}: ${perUnit(e.prev.price, e.line.unit)} → ${perUnit(e.line.price, e.line.unit)}. ${cost}`;
 }
 
+// The plain-text report an owner gets by text or email ("Copy summary" in the app).
+export function summaryText(invoices, { restaurant, alertPct }, date) {
+  const t = Number(alertPct) || 0;
+  const ups = analyze(invoices).events.filter(e => e.pct >= t).sort((a, b) => b.impact - a.impact);
+  const dups = findDuplicates(invoices);
+  const out = [`Price report for ${restaurant}, ${fmtDate(date)}`, ''];
+  if (ups.length) {
+    out.push(`Price increases (${t}% or more):`);
+    ups.forEach(e => out.push(`- ${alertText(e)} (${fmtDate(e.inv.date)})`));
+    out.push('', `Extra paid vs. previous prices: ${money(sumMoney(ups.map(e => e.impact)))}`);
+  } else out.push('No price increases found.');
+  if (dups.length) {
+    out.push('', 'Possible duplicate invoices:');
+    dups.forEach(d => out.push(`- ${invLabel(d.b)} on ${fmtDate(d.b.date)} (${money(invTotal(d.b))}) matches ${invLabel(d.a)} on ${fmtDate(d.a.date)}. ${d.reason}.`));
+  }
+  out.push('', 'Based on the invoices you sent. Lines are checked by hand, but please confirm with your supplier before acting.');
+  return out.join('\n');
+}
+
 // Accepts "item, qty, unit, price", tab-separated spreadsheet rows, or "item qty unit price".
 // Returns null for a blank line and undefined for a line it cannot read.
 export function parseLine(raw) {
