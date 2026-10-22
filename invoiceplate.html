@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>InvoicePlate</title>
+<style>
+:root{
+  --bg:#f6f5f2;--card:#fff;--text:#1d1d1b;--muted:#6b6a65;--line:#e2e0da;
+  --accent:#1f6f4a;--accent-text:#fff;
+  --up:#b42318;--up-bg:#fdecea;--down:#1f6f4a;--down-bg:#e7f4ec;--warn:#8a5a00;--warn-bg:#fff4d6;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#161614;--card:#21211f;--text:#ecebe6;--muted:#a3a29b;--line:#3a3935;
+  --accent:#4fb886;--accent-text:#0d1f16;
+  --up:#ff8a80;--up-bg:#3b1d1a;--down:#7fd1a7;--down-bg:#16301f;--warn:#f3c969;--warn-bg:#3a2f12;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:0 16px}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.top{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:12px 0 8px}
+.brand{font-weight:700;font-size:19px}
+.brand span{color:var(--accent)}
+.tag{color:var(--muted);font-size:13px}
+nav{display:flex;gap:4px;padding-bottom:10px}
+nav button{flex:1;min-height:44px;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:10px;font:inherit;font-weight:600;cursor:pointer}
+nav button[aria-current=page]{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
+main{padding:16px 0 48px}
+section>h2{font-size:18px;margin:0 0 12px}
+h3{font-size:16px;margin:24px 0 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:4px}
+input,textarea{width:100%;font:inherit;font-size:16px;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;min-height:42px}
+input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+textarea{min-height:110px;font-family:ui-monospace,Consolas,monospace;font-size:14px}
+.row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+@media (max-width:600px){.row{grid-template-columns:1fr 1fr}.row>:first-child{grid-column:1/-1}}
+button{font:inherit}
+.btn{min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--text);font-weight:600;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-text)}
+.btn.danger{color:var(--up)}
+.btn.small{min-height:36px;padding:0 12px;font-size:14px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.lines-head,.line{display:grid;gap:6px;align-items:center;grid-template-columns:minmax(0,1fr) 64px 64px 96px 84px 40px;grid-template-areas:"item qty unit price total rm"}
+.lines-head{font-size:12px;font-weight:600;color:var(--muted);padding:12px 0 4px;border-bottom:1px solid var(--line)}
+.line{padding:8px 0;border-bottom:1px solid var(--line)}
+.f-item{grid-area:item}.f-qty{grid-area:qty}.f-unit{grid-area:unit}.f-price{grid-area:price}.f-total{grid-area:total;text-align:right;font-variant-numeric:tabular-nums}.f-rm{grid-area:rm}
+.lines-head .r{text-align:right}
+.icon{width:40px;height:40px;border:0;background:none;color:var(--muted);font-size:22px;cursor:pointer;border-radius:8px}
+.icon:hover{background:var(--bg)}
+@media (max-width:600px){
+  .lines-head{display:none}
+  .line{grid-template-columns:1fr 1fr 1.3fr 1fr 40px;grid-template-areas:"item item item item rm" "qty unit price total total"}
+}
+.total-row{display:flex;justify-content:space-between;font-weight:700;padding:12px 0 0;font-variant-numeric:tabular-nums}
+.hint{color:var(--muted);font-size:14px;margin:4px 0 8px}
+.msg{border-radius:10px;padding:12px;margin-top:12px;font-size:15px}
+.msg:empty{display:none}
+.msg.error{background:var(--up-bg);color:var(--up)}
+.msg.warn{background:var(--warn-bg);color:var(--warn)}
+.msg.ok{background:var(--down-bg);color:var(--down)}
+.msg .actions{margin-top:8px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.stat b{display:block;font-size:24px;font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:13px}
+.alert{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--up);border-radius:10px;padding:12px;margin-bottom:8px}
+.alert.down{border-left-color:var(--down)}
+.alert.dup{border-left-color:var(--warn)}
+.alert p{margin:0}
+.meta{color:var(--muted);font-size:13px;margin-top:4px}
+.badge{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.badge.up{background:var(--up-bg);color:var(--up)}
+.badge.down{background:var(--down-bg);color:var(--down)}
+.badge.warn{background:var(--warn-bg);color:var(--warn)}
+.badge.muted{background:var(--bg);color:var(--muted)}
+.table-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:12px;color:var(--muted)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:0}
+.inv{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.inv .amt{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.empty{color:var(--muted);text-align:center;padding:32px 16px}
+.inline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;font-size:14px;color:var(--muted)}
+.inline input{width:72px;min-height:36px;padding:4px 8px}
+.foot{color:var(--muted);font-size:13px;margin-top:16px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">Invoice<span>Plate</span></div>
+      <div class="tag">Prototype · data stays in this browser</div>
+    </div>
+    <nav>
+      <button data-tab="add" aria-current="page">Add invoice</button>
+      <button data-tab="report">Report</button>
+      <button data-tab="invoices">Invoices</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="view-add">
+    <h2 id="form-title">Add invoice</h2>
+    <div class="card">
+      <div class="row">
+        <div><label for="supplier">Supplier</label><input id="supplier" list="supplier-list" autocomplete="off" placeholder="e.g. Valley Foodservice"></div>
+        <div><label for="invoiceNo">Invoice #</label><input id="invoiceNo" autocomplete="off" placeholder="Optional"></div>
+        <div><label for="date">Invoice date</label><input id="date" type="date"></div>
+      </div>
+      <datalist id="supplier-list"></datalist>
+      <datalist id="unit-list"><option value="lb"><option value="cs"><option value="ea"><option value="gal"><option value="qt"><option value="oz"><option value="bag"><option value="dz"></datalist>
+
+      <div class="lines-head"><span>Item</span><span>Qty</span><span>Unit</span><span>Unit price</span><span class="r">Total</span><span></span></div>
+      <div id="lines"></div>
+      <div class="actions"><button class="btn small" data-action="add-line">+ Add line</button></div>
+      <div class="total-row"><span>Invoice total</span><span id="draft-total">$0.00</span></div>
+    </div>
+
+    <div class="card">
+      <label for="paste">Paste lines</label>
+      <p class="hint">One item per line: item, qty, unit, unit price. Rows copied from a spreadsheet work too.<br>Example: <code>Chicken thighs, 40, lb, 2.39</code></p>
+      <textarea id="paste" placeholder="Chicken thighs, 40, lb, 2.39&#10;Canola oil 35lb	2	cs	41.25&#10;Yellow onions 1 bag 23.50"></textarea>
+      <div class="actions"><button class="btn small" data-action="parse">Add pasted lines</button></div>
+      <div id="paste-msg" class="msg"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" data-action="save">Save invoice</button>
+      <button class="btn" data-action="reset">Clear form</button>
+    </div>
+    <div id="form-msg" class="msg"></div>
+    <div id="saved"></div>
+  </section>
+
+  <section id="view-report" hidden>
+    <h2>Price report</h2>
+    <div id="report"></div>
+  </section>
+
+  <section id="view-invoices" hidden>
+    <h2>Invoices</h2>
+    <div id="invoice-list"></div>
+    <h3>Data</h3>
+    <div class="card">
+      <p class="hint" style="margin-top:0">Everything is stored only in this browser on this device. Export a backup before clearing browser data or switching devices.</p>
+      <div class="actions">
+        <button class="btn small" data-action="export">Export backup</button>
+        <button class="btn small" data-action="import">Import backup</button>
+        <button class="btn small" data-action="sample">Load sample data</button>
+        <button class="btn small" data-action="remove-sample">Remove sample data</button>
+        <button class="btn small danger" data-action="wipe">Delete all data</button>
+      </div>
+      <input id="import-file" type="file" accept="application/json,.json" hidden>
+      <div id="data-msg" class="msg"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+const KEY = 'invoiceplate.v1';
+let db = { invoices: [], settings: { alertPct: 2 } };
+let draft;
+
+// ---------- helpers ----------
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const money = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+const num = v => { const s = String(v ?? '').replace(/[$,\s]/g, ''); return s === '' ? NaN : Number(s); };
+const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+const unitKey = u => norm(u).replace(/s$/, '');
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const invTotal = inv => inv.lines.reduce((t, l) => t + l.qty * l.price, 0);
+const fmtDate = s => s ? new Date(s + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+const fmtPct = p => (Math.abs(p) < 10 ? Math.abs(p).toFixed(1) : Math.round(Math.abs(p))) + '%';
+const perUnit = (price, unit) => money(price) + (unit ? '/' + unit : '');
+const invLabel = inv => inv.supplier + (inv.invoiceNo ? ' #' + inv.invoiceNo : '');
+function today() { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
+
+function load() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) {
+      const d = JSON.parse(raw);
+      db = { invoices: Array.isArray(d.invoices) ? d.invoices : [], settings: Object.assign({ alertPct: 2 }, d.settings) };
+    }
+  } catch (e) { storageWarning(); }
+}
+function persist() {
+  try { localStorage.setItem(KEY, JSON.stringify(db)); }
+  catch (e) { storageWarning(); }
+}
+function storageWarning() {
+  showMsg('#form-msg', 'This browser is blocking storage, so invoices will be lost when the page closes. Use Export backup to keep them.', 'warn');
+}
+function showMsg(sel, html, type) { const el = $(sel); el.className = 'msg ' + (type || ''); el.innerHTML = html; }
+
+// ---------- analysis ----------
+const lineKey = (supplier, l) => norm(supplier) + '|' + norm(l.item) + '|' + unitKey(l.unit);
+const sortedInvoices = () => [...db.invoices].sort((a, b) => (a.date || '').localeCompare(b.date || '') || a.createdAt - b.createdAt);
+
+// Walks invoices oldest to newest and compares each line with the last price paid
+// for the same supplier + item + unit.
+function analyze() {
+  const last = new Map(), items = new Map(), events = [];
+  for (const inv of sortedInvoices()) {
+    for (const l of inv.lines) {
+      const k = lineKey(inv.supplier, l);
+      const prev = last.get(k);
+      if (prev && prev.price > 0 && l.price !== prev.price) {
+        events.push({ inv, line: l, prev, pct: (l.price - prev.price) / prev.price * 100, impact: (l.price - prev.price) * l.qty });
+      }
+      const it = items.get(k) || { supplier: inv.supplier, first: l.price, count: 0 };
+      Object.assign(it, { item: l.item, unit: l.unit, latest: l.price, latestDate: inv.date, prev: prev ? prev.price : null, count: it.count + 1 });
+      items.set(k, it);
+      last.set(k, { price: l.price, date: inv.date, inv });
+    }
+  }
+  return { events, items: [...items.values()] };
+}
+
+function dupReason(a, b) {
+  if (norm(a.supplier) !== norm(b.supplier)) return null;
+  if (a.invoiceNo && b.invoiceNo && norm(a.invoiceNo) === norm(b.invoiceNo)) return 'Same invoice number';
+  const ta = invTotal(a);
+  if (a.date === b.date && ta > 0 && Math.abs(ta - invTotal(b)) < 0.005) return 'Same date and total';
+  return null;
+}
+function allDuplicates() {
+  const list = sortedInvoices(), out = [];
+  for (let i = 0; i < list.length; i++)
+    for (let j = i + 1; j < list.length; j++) {
+      const reason = dupReason(list[i], list[j]);
+      if (reason) out.push({ a: list[i], b: list[j], reason });
+    }
+  return out;
+}
+
+function alertText(e) {
+  const dir = e.pct > 0 ? 'went up' : 'went down';
+  const cost = e.pct > 0 ? `Extra cost on this delivery: ${money(e.impact)}.` : `Saved on this delivery: ${money(-e.impact)}.`;
+  return `${e.line.item} (${e.inv.supplier}) ${dir} ${fmtPct(e.pct)}: ${perUnit(e.prev.price, e.line.unit)} → ${perUnit(e.line.price, e.line.unit)}. ${cost}`;
+}
+
+// ---------- add / edit form ----------
+const blankLine = () => ({ item: '', qty: '', unit: '', price: '' });
+
+function resetForm() {
+  draft = { id: null, lines: [blankLine(), blankLine(), blankLine()] };
+  $('#supplier').value = ''; $('#invoiceNo').value = ''; $('#date').value = today();
+  $('#form-title').textContent = 'Add invoice';
+  showMsg('#form-msg', ''); showMsg('#paste-msg', '');
+  renderLines(); renderSupplierList();
+}
+
+function editInvoice(id) {
+  const inv = db.invoices.find(x => x.id === id);
+  if (!inv) return;
+  draft = { id, lines: inv.lines.map(l => ({ item: l.item, qty: String(l.qty), unit: l.unit, price: String(l.price) })) };
+  $('#supplier').value = inv.supplier; $('#invoiceNo').value = inv.invoiceNo; $('#date').value = inv.date;
+  $('#form-title').textContent = 'Edit invoice';
+  $('#saved').innerHTML = ''; showMsg('#form-msg', ''); showMsg('#paste-msg', '');
+  renderLines(); show('add');
+}
+
+function lineTotal(l) {
+  const q = String(l.qty).trim() === '' ? 1 : num(l.qty), p = num(l.price);
+  return isFinite(q) && isFinite(p) ? q * p : null;
+}
+
+function renderLines() {
+  $('#lines').innerHTML = draft.lines.map((l, i) => {
+    const t = lineTotal(l);
+    return `<div class="line" data-i="${i}">
+      <input class="f-item" data-f="item" placeholder="Item" aria-label="Item" value="${esc(l.item)}">
+      <input class="f-qty" data-f="qty" inputmode="decimal" placeholder="Qty" aria-label="Quantity" value="${esc(l.qty)}">
+      <input class="f-unit" data-f="unit" list="unit-list" placeholder="Unit" aria-label="Unit" value="${esc(l.unit)}">
+      <input class="f-price" data-f="price" inputmode="decimal" placeholder="Price" aria-label="Unit price" value="${esc(l.price)}">
+      <span class="f-total">${t === null ? '—' : money(t)}</span>
+      <button type="button" class="icon f-rm" data-action="remove-line" data-i="${i}" aria-label="Remove line">×</button>
+    </div>`;
+  }).join('');
+  updateDraftTotal();
+}
+
+function updateDraftTotal() {
+  $('#draft-total').textContent = money(draft.lines.reduce((s, l) => s + (lineTotal(l) || 0), 0));
+}
+
+function renderSupplierList() {
+  const names = [...new Set(db.invoices.map(i => i.supplier))].sort();
+  $('#supplier-list').innerHTML = names.map(n => `<option value="${esc(n)}">`).join('');
+}
+
+// Accepts "item, qty, unit, price", tab-separated spreadsheet rows, or "item qty unit price".
+function parseLine(raw) {
+  const s = raw.trim();
+  if (!s) return null;
+  let parts;
+  if (s.includes('\t')) parts = s.split('\t').map(p => p.trim()).filter(Boolean);
+  else if (s.includes(',')) parts = s.split(',').map(p => p.trim()).filter(Boolean);
+  if (parts && parts.length >= 3) {
+    // item may contain commas: take the numeric/unit fields from the end
+    const price = num(parts[parts.length - 1]);
+    let rest = parts.slice(0, -1), unit = '', qty = NaN;
+    if (rest.length >= 3 && !isFinite(num(rest[rest.length - 1]))) unit = rest.pop();
+    qty = num(rest.pop());
+    if (isFinite(price) && isFinite(qty) && rest.length) return { item: rest.join(', '), qty: String(qty), unit, price: String(price) };
+  }
+  const m = s.match(/^(.+?)\s+(\d+(?:\.\d+)?)\s*([A-Za-z#.]+)?\s+\$?(\d[\d,]*(?:\.\d+)?)$/);
+  if (m) return { item: m[1].replace(/[,\s]+$/, ''), qty: m[2], unit: (m[3] || '').replace(/\.$/, ''), price: m[4].replace(/,/g, '') };
+  return undefined;
+}
+
+function parsePaste() {
+  const rows = $('#paste').value.split(/\r?\n/);
+  const added = [], failed = [];
+  for (const r of rows) {
+    const p = parseLine(r);
+    if (p) added.push(p); else if (p === undefined) failed.push(r.trim());
+  }
+  if (!added.length && !failed.length) return;
+  draft.lines = draft.lines.filter(l => l.item || l.qty || l.price || l.unit).concat(added);
+  if (!draft.lines.length) draft.lines.push(blankLine());
+  renderLines();
+  $('#paste').value = failed.join('\n');
+  let html = added.length ? `Added ${added.length} line${added.length > 1 ? 's' : ''}. Check them above before saving.` : '';
+  if (failed.length) html += ` Couldn't read ${failed.length} line${failed.length > 1 ? 's' : ''} (left in the box). Use: item, qty, unit, price.`;
+  showMsg('#paste-msg', html.trim(), failed.length ? 'warn' : 'ok');
+}
+
+function saveInvoice(force) {
+  const supplier = $('#supplier').value.trim(), invoiceNo = $('#invoiceNo').value.trim(), date = $('#date').value;
+  if (!supplier || !date) return showMsg('#form-msg', 'Add a supplier and an invoice date.', 'error');
+
+  const lines = [], bad = [];
+  draft.lines.forEach((l, i) => {
+    if (![l.item, l.qty, l.unit, l.price].some(v => String(v).trim())) return;
+    const item = String(l.item).trim(), qty = String(l.qty).trim() === '' ? 1 : num(l.qty), price = num(l.price);
+    if (!item || !(qty > 0) || !(price >= 0)) bad.push(i + 1);
+    else lines.push({ item, qty, unit: String(l.unit).trim(), price });
+  });
+  if (bad.length) return showMsg('#form-msg', `Check line ${bad.join(', ')}: each line needs an item, a quantity above 0 and a price.`, 'error');
+  if (!lines.length) return showMsg('#form-msg', 'Add at least one line.', 'error');
+
+  const existing = draft.id && db.invoices.find(x => x.id === draft.id);
+  const inv = { id: draft.id || uid(), supplier, invoiceNo, date, lines, createdAt: existing ? existing.createdAt : Date.now() };
+  if (existing && existing.sample) inv.sample = true;
+
+  if (!force) {
+    const dups = db.invoices.filter(o => o.id !== inv.id).map(o => ({ o, reason: dupReason(inv, o) })).filter(d => d.reason);
+    if (dups.length) {
+      const list = dups.map(d => `<li>${esc(invLabel(d.o))}, ${esc(fmtDate(d.o.date))}, ${money(invTotal(d.o))} (${esc(d.reason.toLowerCase())})</li>`).join('');
+      return showMsg('#form-msg', `<b>This may be a duplicate of an invoice already saved:</b><ul>${list}</ul>
+        If it is a real second delivery, save it anyway. It will still show as a possible duplicate in the report.
+        <div class="actions"><button class="btn small" data-action="save-anyway">Save anyway</button><button class="btn small" data-action="dismiss">Cancel</button></div>`, 'warn');
+    }
+  }
+
+  if (existing) Object.assign(existing, inv); else db.invoices.push(inv);
+  persist();
+  resetForm();
+  renderSaved(inv, !!existing);
+}
+
+function renderSaved(inv, edited) {
+  const evs = analyze().events.filter(e => e.inv.id === inv.id);
+  const ups = evs.filter(e => e.pct > 0);
+  const extra = ups.reduce((s, e) => s + e.impact, 0);
+  const firstFromSupplier = !db.invoices.some(o => o.id !== inv.id && norm(o.supplier) === norm(inv.supplier) && (o.date || '') <= (inv.date || ''));
+  let body;
+  if (evs.length) {
+    body = evs.map(e => `<div class="alert ${e.pct > 0 ? '' : 'down'}"><p>${esc(alertText(e))}</p></div>`).join('');
+    if (ups.length) body = `<p><b>${ups.length} price increase${ups.length > 1 ? 's' : ''} on this invoice, ${money(extra)} more than last time.</b></p>` + body;
+  } else if (firstFromSupplier) {
+    body = `<p class="hint">This is the first invoice from ${esc(inv.supplier)}, so these prices become the baseline for later invoices.</p>`;
+  } else {
+    body = `<p class="hint">No price changes compared with earlier invoices.</p>`;
+  }
+  $('#saved').innerHTML = `<div class="card"><div class="msg ok" style="margin:0 0 12px">${edited ? 'Updated' : 'Saved'} ${esc(invLabel(inv))}: ${inv.lines.length} line${inv.lines.length > 1 ? 's' : ''}, ${money(invTotal(inv))}.</div>${body}</div>`;
+}
+
+// ---------- report ----------
+function renderReport() {
+  const el = $('#report');
+  if (!db.invoices.length) {
+    el.innerHTML = `<div class="card empty">No invoices yet. Add one, or load sample data from the Invoices tab.</div>`;
+    return;
+  }
+  const t = Number(db.settings.alertPct) || 0;
+  const { events, items } = analyze();
+  const alerts = events.filter(e => Math.abs(e.pct) >= t)
+    .sort((a, b) => (b.inv.date || '').localeCompare(a.inv.date || '') || Math.abs(b.impact) - Math.abs(a.impact));
+  const ups = alerts.filter(e => e.pct > 0);
+  const extra = ups.reduce((s, e) => s + e.impact, 0);
+  const dups = allDuplicates();
+  const dupAmt = dups.reduce((s, d) => s + invTotal(d.b), 0);
+
+  const alertHtml = alerts.length ? alerts.map(e => `
+    <div class="alert ${e.pct > 0 ? '' : 'down'}">
+      <p>${esc(alertText(e))}</p>
+      <div class="meta">${esc(invLabel(e.inv))} · ${esc(fmtDate(e.inv.date))} · previous price from ${esc(fmtDate(e.prev.date))}</div>
+    </div>`).join('') : `<p class="hint">No price changes of ${t}% or more yet. Changes show up once the same item appears on two invoices from the same supplier.</p>`;
+
+  const dupHtml = dups.length ? dups.map(d => `
+    <div class="alert dup">
+      <p>${esc(invLabel(d.b))} on ${esc(fmtDate(d.b.date))} (${money(invTotal(d.b))}) looks like a duplicate of ${esc(invLabel(d.a))} on ${esc(fmtDate(d.a.date))}.</p>
+      <div class="meta">${esc(d.reason)}. Check that it was only paid once.</div>
+    </div>`).join('') : `<p class="hint">No possible duplicates found.</p>`;
+
+  const rows = items.sort((a, b) => a.supplier.localeCompare(b.supplier) || a.item.localeCompare(b.item)).map(it => {
+    let change = '<span class="badge muted">—</span>';
+    if (it.prev !== null && it.prev > 0 && it.latest !== it.prev) {
+      const p = (it.latest - it.prev) / it.prev * 100;
+      change = `<span class="badge ${p > 0 ? 'up' : 'down'}">${p > 0 ? '▲' : '▼'} ${fmtPct(p)}</span>`;
+    }
+    return `<tr><td>${esc(it.item)}</td><td>${esc(it.supplier)}</td><td class="n">${esc(perUnit(it.latest, it.unit))}</td>
+      <td class="n">${it.prev === null ? '—' : esc(perUnit(it.prev, it.unit))}</td><td>${change}</td><td class="n">${it.count}</td></tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="stats">
+      <div class="stat"><b>${money(extra)}</b><span>Extra paid vs. previous prices</span></div>
+      <div class="stat"><b>${ups.length}</b><span>Price increases of ${t}%+</span></div>
+      <div class="stat"><b>${dups.length}</b><span>Possible duplicate invoices${dups.length ? ' (' + money(dupAmt) + ')' : ''}</span></div>
+      <div class="stat"><b>${db.invoices.length}</b><span>Invoices from ${new Set(db.invoices.map(i => norm(i.supplier))).size} supplier(s)</span></div>
+    </div>
+    <div class="inline"><label for="alert-pct" style="margin:0">Flag changes of</label><input id="alert-pct" inputmode="decimal" value="${esc(t)}"> % or more
+      <button class="btn small" data-action="copy" style="margin-left:auto">Copy summary</button></div>
+    <div id="copy-msg" class="msg"></div>
+    <h3>Price changes</h3>${alertHtml}
+    <h3>Possible duplicates</h3>${dupHtml}
+    <h3>Item prices</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Item</th><th>Supplier</th><th class="n">Latest</th><th class="n">Previous</th><th>Change</th><th class="n">Bought</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+    <p class="foot">Items are matched by supplier, item name and unit, so "Chicken thighs" and "Chix thigh" count as different items. Fix names on the invoice to merge them.</p>`;
+}
+
+function summaryText() {
+  const t = Number(db.settings.alertPct) || 0;
+  const { events } = analyze();
+  const ups = events.filter(e => e.pct >= t).sort((a, b) => b.impact - a.impact);
+  const dups = allDuplicates();
+  const out = [`InvoicePlate price report, ${fmtDate(today())}`, ''];
+  if (ups.length) {
+    out.push(`Price increases (${t}% or more):`);
+    ups.forEach(e => out.push(`- ${alertText(e)} (${fmtDate(e.inv.date)})`));
+    out.push('', `Extra paid vs. previous prices: ${money(ups.reduce((s, e) => s + e.impact, 0))}`);
+  } else out.push('No price increases found.');
+  if (dups.length) {
+    out.push('', 'Possible duplicate invoices:');
+    dups.forEach(d => out.push(`- ${invLabel(d.b)} on ${fmtDate(d.b.date)} (${money(invTotal(d.b))}) matches ${invLabel(d.a)} on ${fmtDate(d.a.date)}. ${d.reason}.`));
+  }
+  out.push('', 'Based on the invoices you sent. Lines are checked by hand, but please confirm with your supplier before acting.');
+  return out.join('\n');
+}
+
+async function copySummary() {
+  const text = summaryText();
+  try {
+    await navigator.clipboard.writeText(text);
+    showMsg('#copy-msg', 'Summary copied. Paste it into a text or email.', 'ok');
+  } catch (e) {
+    showMsg('#copy-msg', `Copy wasn't allowed here. Select the text below and copy it:<textarea readonly style="margin-top:8px">${esc(text)}</textarea>`, 'warn');
+  }
+}
+
+// ---------- invoices list ----------
+function renderInvoices() {
+  const dupIds = new Set(allDuplicates().flatMap(d => [d.a.id, d.b.id]));
+  const list = sortedInvoices().reverse();
+  $('#invoice-list').innerHTML = list.length ? list.map(inv => `
+    <div class="card">
+      <div class="inv">
+        <div>
+          <b>${esc(inv.supplier)}</b>${inv.invoiceNo ? ' <span class="meta">#' + esc(inv.invoiceNo) + '</span>' : ''}
+          ${inv.sample ? '<span class="badge muted">Sample</span>' : ''}
+          ${dupIds.has(inv.id) ? '<span class="badge warn">Possible duplicate</span>' : ''}
+          <div class="meta">${esc(fmtDate(inv.date))} · ${inv.lines.length} line${inv.lines.length > 1 ? 's' : ''}</div>
+        </div>
+        <div class="amt">${money(invTotal(inv))}</div>
+      </div>
+      <div class="actions">
+        <button class="btn small" data-action="edit" data-id="${inv.id}">Edit</button>
+        <button class="btn small danger" data-action="delete" data-id="${inv.id}">Delete</button>
+      </div>
+    </div>`).join('') : `<div class="card empty">No invoices saved yet.</div>`;
+}
+
+// ---------- data ----------
+function sampleInvoices() {
+  const mk = (supplier, invoiceNo, date, rows, offset) => ({
+    id: uid(), supplier, invoiceNo, date, sample: true, createdAt: Date.now() + offset,
+    lines: rows.map(([item, qty, unit, price]) => ({ item, qty, unit, price }))
+  });
+  const week2 = [['Chicken thighs, boneless', 40, 'lb', 2.39], ['Canola oil 35 lb', 2, 'cs', 41.25], ['Yellow onions 50 lb', 1, 'bag', 23.50], ['Heavy cream', 12, 'qt', 3.15]];
+  return [
+    mk('Valley Foodservice', 'VF-10421', '2026-09-28', [['Chicken thighs, boneless', 40, 'lb', 2.10], ['Canola oil 35 lb', 2, 'cs', 38.50], ['Yellow onions 50 lb', 1, 'bag', 24.00], ['Heavy cream', 12, 'qt', 2.95]], 1),
+    mk('Wasatch Produce', 'WP-332', '2026-09-30', [['Romaine hearts', 2, 'cs', 32.00], ['Lemons 115 ct', 1, 'cs', 41.00], ['Cilantro', 1, 'cs', 18.00]], 2),
+    mk('Valley Foodservice', 'VF-10588', '2026-10-05', week2, 3),
+    mk('Wasatch Produce', 'WP-351', '2026-10-07', [['Romaine hearts', 2, 'cs', 36.50], ['Lemons 115 ct', 1, 'cs', 39.00], ['Cilantro', 1, 'cs', 18.00]], 4),
+    mk('Valley Foodservice', 'VF-10588', '2026-10-05', week2, 5)
+  ];
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `invoiceplate-backup-${today()}.json`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+function importData(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const d = JSON.parse(reader.result);
+      if (!Array.isArray(d.invoices)) throw new Error('missing invoices');
+      if (db.invoices.length && !confirm(`Replace the ${db.invoices.length} invoice(s) in this browser with the ${d.invoices.length} in the backup?`)) return;
+      db = { invoices: d.invoices, settings: Object.assign({ alertPct: 2 }, d.settings) };
+      persist(); renderInvoices(); renderSupplierList();
+      showMsg('#data-msg', `Imported ${d.invoices.length} invoice(s).`, 'ok');
+    } catch (e) {
+      showMsg('#data-msg', "That file isn't an InvoicePlate backup.", 'error');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ---------- wiring ----------
+function show(tab) {
+  document.querySelectorAll('nav button').forEach(b => b.setAttribute('aria-current', b.dataset.tab === tab ? 'page' : 'false'));
+  document.querySelectorAll('main > section').forEach(s => { s.hidden = s.id !== 'view-' + tab; });
+  if (tab === 'report') renderReport();
+  if (tab === 'invoices') renderInvoices();
+  window.scrollTo(0, 0);
+}
+
+document.addEventListener('click', e => {
+  const tabBtn = e.target.closest('nav button');
+  if (tabBtn) return show(tabBtn.dataset.tab);
+  const b = e.target.closest('[data-action]');
+  if (!b) return;
+  const id = b.dataset.id;
+  switch (b.dataset.action) {
+    case 'add-line': draft.lines.push(blankLine()); renderLines(); $('#lines .line:last-child .f-item').focus(); break;
+    case 'remove-line': draft.lines.splice(+b.dataset.i, 1); if (!draft.lines.length) draft.lines.push(blankLine()); renderLines(); break;
+    case 'parse': parsePaste(); break;
+    case 'save': saveInvoice(false); break;
+    case 'save-anyway': saveInvoice(true); break;
+    case 'dismiss': showMsg('#form-msg', ''); break;
+    case 'reset': resetForm(); $('#saved').innerHTML = ''; break;
+    case 'copy': copySummary(); break;
+    case 'edit': editInvoice(id); break;
+    case 'delete': {
+      const inv = db.invoices.find(x => x.id === id);
+      if (inv && confirm(`Delete ${invLabel(inv)} from ${fmtDate(inv.date)}?`)) { db.invoices = db.invoices.filter(x => x.id !== id); persist(); renderInvoices(); renderSupplierList(); }
+      break;
+    }
+    case 'export': exportData(); break;
+    case 'import': $('#import-file').click(); break;
+    case 'sample':
+      db.invoices = db.invoices.filter(i => !i.sample).concat(sampleInvoices());
+      persist(); renderInvoices(); renderSupplierList();
+      showMsg('#data-msg', 'Sample data loaded. Open the Report tab to see the results.', 'ok');
+      break;
+    case 'remove-sample':
+      db.invoices = db.invoices.filter(i => !i.sample);
+      persist(); renderInvoices(); renderSupplierList();
+      showMsg('#data-msg', 'Sample data removed.', 'ok');
+      break;
+    case 'wipe':
+      if (confirm('Delete every invoice stored in this browser? This cannot be undone. Export a backup first if you need one.')) {
+        db.invoices = []; persist(); renderInvoices(); renderSupplierList();
+        showMsg('#data-msg', 'All data deleted.', 'ok');
+      }
+      break;
+  }
+});
+
+document.addEventListener('input', e => {
+  const f = e.target.dataset.f;
+  if (f) {
+    const row = e.target.closest('.line'), l = draft.lines[+row.dataset.i];
+    l[f] = e.target.value;
+    const t = lineTotal(l);
+    row.querySelector('.f-total').textContent = t === null ? '—' : money(t);
+    updateDraftTotal();
+  } else if (e.target.id === 'alert-pct') {
+    const v = num(e.target.value);
+    if (v >= 0) { db.settings.alertPct = v; persist(); const pos = e.target.selectionStart; renderReport(); const inp = $('#alert-pct'); inp.focus(); inp.setSelectionRange(pos, pos); }
+  }
+});
+
+$('#import-file').addEventListener('change', e => { if (e.target.files[0]) importData(e.target.files[0]); e.target.value = ''; });
+
+load();
+resetForm();
+</script>
+</body>
+</html>
