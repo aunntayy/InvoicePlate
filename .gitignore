@@ -1,0 +1,4 @@
+.taste-skill/
+node_modules/
+# Local database: real invoices are financial documents and never go into git.
+database/data/

@@ -6,14 +6,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository state
 
-`invoiceplate.html` is the whole prototype: one self-contained file (HTML, CSS and vanilla JS, no dependencies, no build step). Open it directly in a browser to run it. There is no linter or test suite.
+A Node app with no npm dependencies and no build step. It needs Node 22.13 or newer for the built-in `node:sqlite`.
+
+- `npm start` runs the server at http://localhost:3000. `npm run dev` restarts it when files change.
+- `npm test` runs every `*.test.js` file with `node:test`. To run one file: `node --test tests/api.test.js`. To run one test: `node --test --test-name-pattern="saves settings"`.
+- Environment variables: `PORT`, `HOST` (default `127.0.0.1`, so localhost only), and `DB_PATH` (default `database/data/invoiceplate.db`, ignored by git). Point `DB_PATH` at a scratch file when testing by hand.
+
+Layout:
+- `frontend/`: static files served by the backend. `index.html` holds the markup, `styles.css` the design, and `app.js` the screens, forms and API calls. `lib/invoice-logic.js` holds the pure logic (parsing, price comparison, duplicates, formatting). It has no DOM access, so the browser and the tests both import it.
+- `backend/`: `server.js` starts the app. `app.js` serves `frontend/` plus the JSON API (the routes are listed in a comment above `handleApi`). `validate.js` checks every request body before it reaches the database.
+- `database/`: `schema.sql` is applied on every start, so its statements must be idempotent. `db.js` holds all the SQL. There is one restaurant (`RESTAURANT_ID = 1`) until logins exist, but every query is already scoped by `restaurant_id`. `invoice_lines.confidence` is reserved for AI extraction.
+- `tests/`: `invoice-logic.test.js` covers the pure logic. `api.test.js` starts the app on an in-memory database.
 
 How it works:
-- All state is one object (`db = { invoices, settings }`) saved to `localStorage` under the key `invoiceplate.v1`. Changing its shape needs a migration in `load()` or existing pilot data breaks. Export/Import backup moves it as JSON.
+- The backend only stores data. All analysis runs in the browser from `GET /api/state` (settings plus every invoice with its lines, in the same shape as an exported backup). Each change calls the API, then reloads state (`commit()` in `app.js`).
 - Prices are compared in `analyze()`, which walks invoices oldest to newest (by date, then `createdAt`) and compares each line with the last price for the same key: normalized supplier + item name + unit (`lineKey`). Every change is an event with `pct` and `impact` (price delta × qty). The report, the post-save summary and the "Copy summary" text all come from these events.
 - Duplicates are found in `dupReason()`: same supplier plus the same invoice number, or the same date and total.
+- Screens are hash routes: `#add`, `#report` and `#invoices` (`show()` switches them and sets the one shared `h1`). Adding `?demo` to the address shows the sample invoices in memory, without reading or writing the database. Use it to show owners, and for screenshots.
+- The visual design follows the `design-taste-frontend` skill's app-screen rules, in the "achromatic ledger" style. The interface itself has no color. The one blue (`--hue`) goes only on the "Where the extra went" bars, and red ▲ / green ▼ only on price changes. Check visual changes with the skill's `inspect.mjs --app` against `http://localhost:3000/?demo#report` (and the other routes). Its output goes to `.taste-skill/`, which git ignores.
+- A possible duplicate (the later copy) is skipped in `analyze()`, so a delivery entered twice doesn't change prices or the "Bought" count.
 - `parseLine()` handles pasted lines in the forms "item, qty, unit, price", tab-separated spreadsheet rows and "item qty unit price". Price means unit price, not line total.
 - The interview script is not in the repo yet.
+- `LOG.md` is the daily work log. At the end of each working day, add or update today's entry at the top: 3-6 one-line bullets on what was done, plus a "Next:" line. Keep it short and plain.
 
 ## What this project is
 
@@ -43,12 +57,12 @@ The product is manual-assisted. AI reads the invoice, the founder reviews low-co
 
 What exists:
 
-- A working prototype page (`invoiceplate.html`): add invoice lines by typing or pasting, detect price changes against previous prices, flag possible duplicate invoices, and produce a price report. Data is stored only in the browser.
+- A working prototype app: add invoice lines by typing or pasting, detect price changes against previous prices, flag possible duplicate invoices, and produce a price report. Data is stored in a local SQLite database, which is not encrypted yet (see Guardrails).
 - An owner and manager interview script.
 
 Not built yet:
 
-- Photo or PDF extraction with the Claude API (needs a small backend, since a published page can't call the API directly).
+- Photo or PDF extraction with the Claude API. It belongs in `backend/`, behind one function, and writes `invoice_lines.confidence`.
 - Intake by email forwarding or upload form.
 - Item matching across suppliers and naming variations.
 - POS and accounting integrations, recipe costing, logins, payments.

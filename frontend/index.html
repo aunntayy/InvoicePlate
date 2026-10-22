@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>InvoicePlate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-mark" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.25"/><circle cx="12" cy="12" r="6"/></symbol>
+  <symbol id="i-add" viewBox="0 0 20 20"><path d="M5.5 2.75h6l3.75 3.75v10.75h-9.75z"/><path d="M10.5 9.5v5M8 12h5"/></symbol>
+  <symbol id="i-report" viewBox="0 0 20 20"><path d="M3.5 16.5h13M5.5 13.5v-4M10 13.5v-9M14.5 13.5v-6"/></symbol>
+  <symbol id="i-list" viewBox="0 0 20 20"><path d="M7 5.5h9.5M7 10h9.5M7 14.5h9.5M3.5 5.5h.5M3.5 10h.5M3.5 14.5h.5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></symbol>
+</svg>
+
+<div class="shell">
+  <aside class="side">
+    <a class="brand" href="#report"><svg aria-hidden="true"><use href="#i-mark"/></svg><div><b>InvoicePlate</b><span class="scope">Your restaurant</span></div></a>
+    <nav class="nav" aria-label="Screens">
+      <a href="#add" data-view="add"><svg aria-hidden="true"><use href="#i-add"/></svg>Add invoice</a>
+      <a href="#report" data-view="report"><svg aria-hidden="true"><use href="#i-report"/></svg>Price report</a>
+      <a href="#invoices" data-view="invoices"><svg aria-hidden="true"><use href="#i-list"/></svg>Invoices</a>
+    </nav>
+    <p class="side-foot" id="storage-note"></p>
+  </aside>
+
+  <div>
+    <header class="topbar">
+      <a class="brand" href="#report"><svg aria-hidden="true"><use href="#i-mark"/></svg><b>InvoicePlate</b><span class="scope">Your restaurant</span></a>
+    </header>
+
+    <main>
+      <!-- Shown until app.js loads: opening this file directly (not through the server) cannot run the app. -->
+      <div id="server-msg" class="msg error" role="alert" style="margin:0 0 16px">InvoicePlate runs through its server. In the project folder run <b>npm start</b>, then open <b>http://localhost:3000</b>.</div>
+      <!-- One title row for every screen; show() sets the title and shows that screen's tools. -->
+      <div class="title-row">
+        <div><h1 id="title"></h1><p class="sub" id="sub"></p></div>
+        <div class="tools" data-for="report" hidden>
+          <span class="inline-field"><label for="alert-pct" style="margin:0;font-weight:400">Flag changes of</label><input id="alert-pct" class="num" inputmode="decimal">%+</span>
+          <button class="btn primary" data-action="copy">Copy summary</button>
+        </div>
+        <div class="tools" data-for="invoices" hidden><a class="btn primary" href="#add" data-action="new">Add invoice</a></div>
+      </div>
+
+      <!-- Add invoice -->
+      <section id="view-add" hidden>
+        <div id="saved"></div>
+        <div class="grid cols-2-1 stretch">
+          <div class="panel">
+            <div class="fields">
+              <div><label for="supplier">Supplier</label><input id="supplier" list="supplier-list" autocomplete="off" placeholder="Supplier name"></div>
+              <div><label for="invoiceNo">Invoice #</label><input id="invoiceNo" autocomplete="off" placeholder="Optional"></div>
+              <div><label for="date">Invoice date</label><input id="date" type="date"></div>
+            </div>
+            <datalist id="supplier-list"></datalist>
+            <datalist id="unit-list"><option value="lb"><option value="cs"><option value="ea"><option value="gal"><option value="qt"><option value="oz"><option value="bag"><option value="dz"></datalist>
+            <div class="lines-head"><span>Item</span><span>Qty</span><span>Unit</span><span>Unit price</span><span class="r">Line total</span><span></span></div>
+            <div id="lines"></div>
+            <button class="btn add-line" data-action="add-line">Add line</button>
+            <div id="form-msg" class="msg" role="status"></div>
+            <div class="form-foot">
+              <div class="total">Invoice total <b class="num" id="draft-total">$0.00</b></div>
+              <div class="tools">
+                <button class="btn" data-action="reset">Clear</button>
+                <button class="btn primary" data-action="save">Save invoice</button>
+              </div>
+            </div>
+          </div>
+          <div class="panel paste">
+            <div class="panel-head"><h2>Paste lines</h2></div>
+            <p class="hint">One item per line: item, qty, unit, unit price. Rows copied from a spreadsheet work too.</p>
+            <label for="paste" class="desk-only" style="position:absolute;left:-9999px">Lines to paste</label>
+            <textarea id="paste" placeholder="Chicken thighs, 40, lb, 2.39&#10;Canola oil 35 lb, 2, cs, 41.25&#10;Yellow onions 1 bag 23.50"></textarea>
+            <div class="tools" style="margin-top:12px"><button class="btn" data-action="parse">Add to invoice</button></div>
+            <div id="paste-msg" class="msg" role="status"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Price report -->
+      <section id="view-report" hidden>
+        <div id="copy-msg" class="msg" role="status" style="margin:0 0 12px"></div>
+        <div id="report-body"></div>
+      </section>
+
+      <!-- Invoices -->
+      <section id="view-invoices" hidden>
+        <div class="panel" style="margin-bottom:var(--gap)" id="invoice-list"></div>
+        <div class="panel">
+          <div class="panel-head"><h2>Restaurant and data</h2></div>
+          <div class="setting">
+            <div><h3>Restaurant name</h3><p>Shown at the top and on the copied summary.</p></div>
+            <div><label for="restaurant" style="position:absolute;left:-9999px">Restaurant name</label><input id="restaurant" autocomplete="off" placeholder="Your restaurant"><span class="stamp" id="name-stamp"></span></div>
+          </div>
+          <div class="setting">
+            <div><h3>Backup</h3><p>Invoices are saved in the InvoicePlate database on this computer. Export a file to keep a copy somewhere else.</p></div>
+            <div class="tools"><button class="btn" data-action="export">Export backup</button><button class="btn" data-action="import">Import backup</button></div>
+          </div>
+          <div class="setting" id="sample-setting">
+            <div><h3>Sample data</h3><p>Five invoices from two suppliers, to see what a report looks like.</p></div>
+            <div class="tools"><button class="btn" data-action="sample">Load sample data</button><button class="btn" data-action="remove-sample">Remove sample data</button></div>
+          </div>
+          <div class="setting">
+            <div><h3>Delete all data</h3><p>Removes every invoice from the database. This cannot be undone.</p></div>
+            <div class="tools"><button class="btn danger" data-action="wipe">Delete all invoices</button></div>
+          </div>
+          <input id="import-file" type="file" accept="application/json,.json" hidden>
+          <div id="data-msg" class="msg" role="status"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<nav class="tabbar" aria-label="Screens">
+  <a href="#add" data-view="add"><svg aria-hidden="true"><use href="#i-add"/></svg>Add</a>
+  <a href="#report" data-view="report"><svg aria-hidden="true"><use href="#i-report"/></svg>Report</a>
+  <a href="#invoices" data-view="invoices"><svg aria-hidden="true"><use href="#i-list"/></svg>Invoices</a>
+</nav>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
