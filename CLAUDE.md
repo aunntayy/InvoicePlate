@@ -10,13 +10,15 @@ A Node app with no npm dependencies and no build step. It needs Node 22.13 or ne
 
 - `npm start` runs the server at http://localhost:3000. `npm run dev` restarts it when files change.
 - `npm test` runs every `*.test.js` file with `node:test`. To run one file: `node --test tests/api.test.js`. To run one test: `node --test --test-name-pattern="saves settings"`.
-- Environment variables: `PORT`, `HOST` (default `127.0.0.1`, so localhost only), and `DB_PATH` (default `database/data/invoiceplate.db`, ignored by git). Point `DB_PATH` at a scratch file when testing by hand.
+- Environment variables: `PORT`, `HOST` (default `127.0.0.1`, so localhost only), `DB_PATH` (default `database/data/invoiceplate.db`, ignored by git) and `DB_KEY` (the encryption key). Point `DB_PATH` at a scratch file when testing by hand.
+- `npm run keygen` writes `DB_KEY` to `.env` (ignored by git), which `npm start` and `npm run dev` load. The server won't open a database file without the key, and it never replaces an existing key: a lost key means unreadable data.
 
 Layout:
 - `frontend/`: static files served by the backend. `index.html` holds the markup, `styles.css` the design, and `app.js` the screens, forms and API calls. `lib/invoice-logic.js` holds the pure logic (parsing, price comparison, duplicates, formatting). It has no DOM access, so the browser and the tests both import it.
 - `backend/`: `server.js` starts the app. `app.js` serves `frontend/` plus the JSON API (the routes are listed in a comment above `handleApi`). `validate.js` checks every request body before it reaches the database.
-- `database/`: `schema.sql` is applied on every start, so its statements must be idempotent. `db.js` holds all the SQL. There is one restaurant (`RESTAURANT_ID = 1`) until logins exist, but every query is already scoped by `restaurant_id`. `invoice_lines.confidence` is reserved for AI extraction.
-- `tests/`: `invoice-logic.test.js` covers the pure logic. `api.test.js` starts the app on an in-memory database.
+- `database/`: `schema.sql` is applied on every start, so its statements must be idempotent. `db.js` holds all the SQL. There is one restaurant (`RESTAURANT_ID = 1`) until logins exist, but every query is already scoped by `restaurant_id`. `invoice_lines.confidence` is reserved for AI extraction. `crypto.js` encrypts the restaurant name, supplier, invoice number and each line (AES-256-GCM, sealed in `db.js`). Ids, dates and flags stay plain so SQL can scope and sort them. `secure_delete` is on, so deleted rows are overwritten.
+- `tests/`: `invoice-logic.test.js` covers the pure logic. `api.test.js` starts the app on an in-memory database. `db.test.js` checks encryption, key handling and deletion on real files.
+- `docs/`: `interview-script.md` (owner interviews) and `pilot-outreach.md` (messages asking for interviews and pilots).
 
 How it works:
 - The backend only stores data. All analysis runs in the browser from `GET /api/state` (settings plus every invoice with its lines, in the same shape as an exported backup). Each change calls the API, then reloads state (`commit()` in `app.js`).
@@ -26,8 +28,7 @@ How it works:
 - The visual design follows the `design-taste-frontend` skill's app-screen rules, in the "achromatic ledger" style. The interface itself has no color. The one blue (`--hue`) goes only on the "Where the extra went" bars, and red ▲ / green ▼ only on price changes. Check visual changes with the skill's `inspect.mjs --app` against `http://localhost:3000/?demo#report` (and the other routes). Its output goes to `.taste-skill/`, which git ignores.
 - A possible duplicate (the later copy) is skipped in `analyze()`, so a delivery entered twice doesn't change prices or the "Bought" count.
 - `parseLine()` handles pasted lines in the forms "item, qty, unit, price", tab-separated spreadsheet rows and "item qty unit price". Price means unit price, not line total.
-- The interview script is not in the repo yet.
-- `LOG.md` is the daily work log. At the end of each working day, add or update today's entry at the top: 3-6 one-line bullets on what was done, plus a "Next:" line. Keep it short and plain.
+- `LOG.md` is the daily work log. At the end of each session, add a new entry at the bottom (a second session on the same day is "YYYY-MM-DD (session 2)"): 3-6 one-line bullets on what was done, plus a "Next:" line. Never edit or merge earlier entries. Keep it short and plain.
 
 ## What this project is
 
@@ -57,8 +58,8 @@ The product is manual-assisted. AI reads the invoice, the founder reviews low-co
 
 What exists:
 
-- A working prototype app: add invoice lines by typing or pasting, detect price changes against previous prices, flag possible duplicate invoices, and produce a price report. Data is stored in a local SQLite database, which is not encrypted yet (see Guardrails).
-- An owner and manager interview script.
+- A working prototype app: add invoice lines by typing or pasting, detect price changes against previous prices, flag possible duplicate invoices, and produce a price report. Data is stored in a local SQLite database, with invoice fields encrypted (see Guardrails).
+- An owner and manager interview script and pilot outreach messages, in `docs/`.
 
 Not built yet:
 

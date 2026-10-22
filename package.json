@@ -6,8 +6,9 @@
     "node": ">=22.13"
   },
   "scripts": {
-    "start": "node backend/server.js",
-    "dev": "node --watch backend/server.js",
+    "start": "node --env-file-if-exists=.env backend/server.js",
+    "dev": "node --env-file-if-exists=.env --watch backend/server.js",
+    "keygen": "node database/keygen.js",
     "test": "node --test"
   }
 }

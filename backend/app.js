@@ -77,8 +77,8 @@ async function serveFrontend(req, res, url) {
   res.end(req.method === 'HEAD' ? undefined : body);
 }
 
-export function createApp({ dbPath } = {}) {
-  const store = openDatabase(dbPath);
+export function createApp({ dbPath, dbKey } = {}) {
+  const store = openDatabase(dbPath, dbKey);
   const server = createServer(async (req, res) => {
     const url = new URL(req.url, 'http://localhost');
     try {

@@ -2,3 +2,7 @@
 node_modules/
 # Local database: real invoices are financial documents and never go into git.
 database/data/
+# Graphify's code map: rebuild with `graphify update .`
+graphify-out/
+# Holds DB_KEY, the database encryption key.
+.env
